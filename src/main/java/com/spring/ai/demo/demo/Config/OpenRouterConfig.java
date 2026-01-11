@@ -5,6 +5,7 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 
 @Configuration
 public class OpenRouterConfig {
@@ -14,11 +15,13 @@ public class OpenRouterConfig {
     @Value("${spring.ai.openai.chat.fallback-model}")
     private String fallbackModel;
 
+    @Value("classpath:/Helpdesk-System.st")
+    private Resource systemPromptResource;
+
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
         // You can customize default options here
         return builder
-                .defaultSystem("You are doctor represtative and your name is liza   Always reply in a concise and normal human  manner.")
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
     }
@@ -32,4 +35,10 @@ public class OpenRouterConfig {
     public String fallbackModel() {
         return fallbackModel;
     }
+
+    @Bean
+    public Resource systemPromptResource() {
+        return systemPromptResource;
+    }
+
 }

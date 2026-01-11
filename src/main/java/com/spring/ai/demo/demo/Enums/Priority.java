@@ -1,5 +1,5 @@
 package com.spring.ai.demo.demo.Enums;
 
-public enum Priorty {
+public enum Priority {
     Low, Medium, High
 }

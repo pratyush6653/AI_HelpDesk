@@ -1,6 +1,6 @@
 package com.spring.ai.demo.demo.Entities;
 
-import com.spring.ai.demo.demo.Enums.Priorty;
+import com.spring.ai.demo.demo.Enums.Priority;
 import com.spring.ai.demo.demo.Enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class Ticket {
     @Column(nullable = false)
     private String summary;
     @Enumerated(EnumType.STRING)
-    private Priorty priorty;
+    private Priority priority;
     @Column(nullable = false, unique = true)
     private String userName;
     private LocalDateTime createdAt;
