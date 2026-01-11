@@ -14,8 +14,7 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String summary;
     @Enumerated(EnumType.STRING)
     private Priority priority;

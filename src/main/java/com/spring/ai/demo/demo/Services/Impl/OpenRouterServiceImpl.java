@@ -1,5 +1,6 @@
 package com.spring.ai.demo.demo.Services.Impl;
 
+
 import com.spring.ai.demo.demo.DTO.OpenRouterRequest;
 import com.spring.ai.demo.demo.DTO.OpenRouterResponse;
 import com.spring.ai.demo.demo.Services.OpenRouterServices;
@@ -12,6 +13,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -43,14 +46,16 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
                                          String modelName) {
         try {
             OpenRouterResponse content = client.prompt()
-                    .tools(ticketDatabaseTool)
                     .system(systemPromptResource)
+                    .system("It is mandatory to use the provided tools to assist with help desk ticket management.")
+                    .tools(ticketDatabaseTool)
                     .options(ChatOptions.builder()
                             .model(modelName)
                             .build())
                     .user(request.messages().content())
                     .call()
                     .entity(OpenRouterResponse.class);
+            Instant parsedAt = parseTimestamp(content.timestamp());
             return content;
 
         } catch (Exception ex) {
@@ -59,6 +64,19 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
         }
     }
 
+    private Instant parseTimestamp(String ts) {
+        if (ts == null || ts.isBlank()) {
+            return Instant.now();
+        }
+
+        // Already valid ISO-8601
+        if (ts.endsWith("Z") || ts.contains("+")) {
+            return Instant.parse(ts);
+        }
+
+        // LLM forgot timezone → force UTC
+        return Instant.parse(ts + "Z");
+    }
 
 }
 

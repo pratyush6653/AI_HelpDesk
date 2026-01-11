@@ -1,5 +1,8 @@
 package com.spring.ai.demo.demo.Config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +42,17 @@ public class OpenRouterConfig {
     @Bean
     public Resource systemPromptResource() {
         return systemPromptResource;
+    }
+
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        // Register JavaTimeModule to handle java.time.* classes
+        mapper.registerModule(new JavaTimeModule());
+        // Write dates as ISO-8601 strings
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
     }
 
 }
