@@ -5,7 +5,6 @@ import java.time.Instant;
 public record OpenRouterResponse(String role,
                                  String title,
                                  String content,
-                                 String model,
                                  Instant timestamp
 ) {
 }
