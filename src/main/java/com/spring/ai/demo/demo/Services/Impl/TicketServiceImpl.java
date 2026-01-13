@@ -4,6 +4,7 @@ import com.spring.ai.demo.demo.DTO.TicketCommand;
 import com.spring.ai.demo.demo.Entities.Ticket;
 import com.spring.ai.demo.demo.Enums.Status;
 import com.spring.ai.demo.demo.Repositories.TicketRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,10 @@ public class TicketServiceImpl {
     private final TicketRepository ticketRepository;
 
     //Create Ticket
+    @Transactional
     public Ticket createTicket(TicketCommand input) {
         Ticket ticket = new Ticket();
+        ticket.setId(null); // Ensure ID is null for new ticket
         ticket.setUserName(input.userName());
         ticket.setEmail(input.email());
         ticket.setSummary(input.summary());

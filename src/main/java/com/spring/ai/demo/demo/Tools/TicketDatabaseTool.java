@@ -3,6 +3,8 @@ package com.spring.ai.demo.demo.Tools;
 import com.spring.ai.demo.demo.DTO.TicketCommand;
 import com.spring.ai.demo.demo.DTO.TicketView;
 import com.spring.ai.demo.demo.Entities.Ticket;
+import com.spring.ai.demo.demo.Enums.Priority;
+import com.spring.ai.demo.demo.Enums.Status;
 import com.spring.ai.demo.demo.Services.Impl.TicketServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
@@ -14,12 +16,22 @@ import org.springframework.stereotype.Component;
 public class TicketDatabaseTool {
     private final TicketServiceImpl ticketService;
 
-    @Tool(description = "Create a new help desk ticket in the database. Use ONLY when all required fields are available.")
+    @Tool(description = "Create a new help desk ticket in the database. Use ONLY when all required fields are available")
     public TicketView createTicket(
-            @ToolParam(description = "Ticket details including userName, email, summary, priority")
-            TicketCommand input
+            @ToolParam(description = "User's  name") String userName,
+            @ToolParam(description = "User's email address") String email,
+            @ToolParam(description = "Brief description of the issue") String summary,
+            @ToolParam(description = "Priority: High, Medium, or Low") String priority
     ) {
-        Ticket createdTicket = ticketService.createTicket(input);
+        TicketCommand ticketCommand = new TicketCommand(
+                userName,
+                email,
+                summary,
+                Priority.valueOf(priority),
+                Status.Open
+        );
+        Ticket createdTicket = ticketService.createTicket(ticketCommand);
+
         return toView(createdTicket);
     }
 

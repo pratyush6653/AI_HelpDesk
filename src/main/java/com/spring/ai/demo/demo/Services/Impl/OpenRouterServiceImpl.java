@@ -8,6 +8,8 @@ import com.spring.ai.demo.demo.Tools.TicketDatabaseTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.core.io.Resource;
 import org.springframework.retry.annotation.Backoff;
@@ -20,19 +22,19 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 public class OpenRouterServiceImpl implements OpenRouterServices {
-
     private final Resource systemPromptResource;
     private final ChatClient chatClient;
     private final String fallbackModel;
     private final String primaryModel;
     private final TicketDatabaseTool ticketDatabaseTool;
+    private final ChatMemory chatMemory;
 
-    public OpenRouterResponse processMessage(OpenRouterRequest request) {
+    public OpenRouterResponse processMessage(OpenRouterRequest request, String conversationId) {
         try {
-            return callModel(chatClient, request, primaryModel);
+            return callModel(chatClient, request, primaryModel, conversationId);
         } catch (Exception e) {
             log.error("⚠️ Primary model failed. Switching to fallback model...");
-            return callModel(chatClient, request, fallbackModel);
+            return callModel(chatClient, request, fallbackModel, conversationId);
         }
     }
 
@@ -43,11 +45,13 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
     )
     private OpenRouterResponse callModel(ChatClient client,
                                          OpenRouterRequest request,
-                                         String modelName) {
+                                         String modelName, String conversationId) {
         try {
+            chatMemory.add(conversationId, new UserMessage(request.messages().content()));
             OpenRouterResponse content = client.prompt()
                     .system(systemPromptResource)
                     .system("It is mandatory to use the provided tools to assist with help desk ticket management.")
+                    .system("use the tools exactly as described ")
                     .tools(ticketDatabaseTool)
                     .options(ChatOptions.builder()
                             .model(modelName)
@@ -56,6 +60,11 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
                     .call()
                     .entity(OpenRouterResponse.class);
             Instant parsedAt = parseTimestamp(content.timestamp());
+
+            if (content.toolUsed()) {  // <-- you must implement this flag
+                chatMemory.clear(conversationId);
+                log.info("🧹 Cleared conversation memory for conversationId {}", conversationId);
+            }
             return content;
 
         } catch (Exception ex) {
@@ -77,6 +86,5 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
         // LLM forgot timezone → force UTC
         return Instant.parse(ts + "Z");
     }
-
 }
 
