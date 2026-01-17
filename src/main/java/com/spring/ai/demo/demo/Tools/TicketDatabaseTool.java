@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class TicketDatabaseTool {
     private final TicketServiceImpl ticketService;
 
-    @Tool(description = "Create a new help desk ticket in the database. Use ONLY when all required fields are available")
+    @Tool(description = "Create a new ticket in the database. Use ONLY when all required fields are available")
     public TicketView createTicket(
             @ToolParam(description = "User's  name") String userName,
             @ToolParam(description = "User's email address") String email,

@@ -72,7 +72,7 @@ public class OpenRouterConfig {
     @Bean
     public ChatMemory chatMemory(ChatMemoryRepository repository) {
         return MessageWindowChatMemory.builder().chatMemoryRepository(repository)
-                .maxMessages(10)   // keep last 10 messages only
+                .maxMessages(20)
                 .build();
     }
 

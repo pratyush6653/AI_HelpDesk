@@ -38,6 +38,15 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
         }
     }
 
+//    public Flux<String> streamMessage(OpenRouterRequest request, String conversationId) {
+//        try {
+//            return StreamResponse(chatClient, request, primaryModel, conversationId);
+//        } catch (Exception e) {
+//            log.error("⚠️ Primary model failed. Switching to fallback model...");
+//            return StreamResponse(chatClient, request, fallbackModel, conversationId);
+//        }
+//    }
+
     @Retryable(
             retryFor = Exception.class,
             maxAttempts = 2,
@@ -60,8 +69,7 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
                     .call()
                     .entity(OpenRouterResponse.class);
             Instant parsedAt = parseTimestamp(content.timestamp());
-
-            if (content.toolUsed()) {  // <-- you must implement this flag
+            if (content.toolUsed()) {
                 chatMemory.clear(conversationId);
                 log.info("🧹 Cleared conversation memory for conversationId {}", conversationId);
             }
@@ -77,14 +85,43 @@ public class OpenRouterServiceImpl implements OpenRouterServices {
         if (ts == null || ts.isBlank()) {
             return Instant.now();
         }
-
-        // Already valid ISO-8601
         if (ts.endsWith("Z") || ts.contains("+")) {
             return Instant.parse(ts);
         }
 
-        // LLM forgot timezone → force UTC
+        // Model  forgot timezone → force UTC
         return Instant.parse(ts + "Z");
     }
+
+
+//    public Flux<String> StreamResponse(
+//            ChatClient client,
+//            OpenRouterRequest request,
+//            String modelName, String conversationId) {
+//        try {
+//            chatMemory.add(conversationId, new UserMessage(request.messages().content()));
+//            AtomicBoolean toolUsed = new AtomicBoolean(false);
+//            return client.prompt()
+//                    .system(systemPromptResource)
+//                    .system("It is mandatory to use the provided tools to assist with help desk ticket management.")
+//                    .system("use the tools exactly as described ")
+//                    .tools(ticketDatabaseTool)
+//                    .options(ChatOptions.builder()
+//                            .model(modelName)
+//                            .build())
+//                    .user(request.messages().content())
+//                    .stream()
+//                    .content()
+//                    .doOnComplete(() -> {
+//                        if (toolUsed.get()) {
+//                            chatMemory.clear(conversationId);
+//                            log.info("🧹 Cleared conversation memory for conversationId {}", conversationId);
+//                        }
+//                    });
+//        } catch (Exception ex) {
+//            log.error("Model call failed: {}", ex.getLocalizedMessage());
+//            throw new RuntimeException("Model call failed: " + modelName);
+//        }
+//    }
 }
 

@@ -32,14 +32,24 @@ public class ChatController {
         }
         chatMemory.add(conversationId, new UserMessage(chatRequest.messages().content()));
         OpenRouterResponse openRouterResponse = chatService.processMessage(chatRequest, conversationId);
-//        if (openRouterResponse.isTicketCreated()) {
-//            chatMemory.clear(conversationId);
-//            log.info("🧹 Conversation memory cleared for conversationId {}", conversationId);
-//        }
         log.info("📬 Sending response back to client");
         return ResponseEntity.ok()
                 .header("X-Conversation-Id", conversationId)
                 .body(openRouterResponse);
     }
+
+//    @PostMapping("/stream")
+//    public Flux<String> streamResponse(
+//            @RequestHeader(value = "X-Conversation-Id", required = false) String conversationId,
+//            @RequestBody OpenRouterRequest chatRequest) {
+//        log.info("🔄 Received chat request from client");
+//        if (conversationId == null || conversationId.isBlank()) {
+//            conversationId = UUID.randomUUID().toString();
+//            log.info("🆕 New conversation created: {}", conversationId);
+//        }
+//        Flux<String> responseFlux = chatService.streamMessage(chatRequest, conversationId);
+//        log.info("📬 Streaming response back to client");
+//        return responseFlux;
+//    }
 
 }

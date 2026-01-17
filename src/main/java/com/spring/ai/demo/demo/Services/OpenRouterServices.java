@@ -5,4 +5,6 @@ import com.spring.ai.demo.demo.DTO.OpenRouterResponse;
 
 public interface OpenRouterServices {
     public OpenRouterResponse processMessage(OpenRouterRequest request, String conversationId);
+
+//    public Flux<String> streamMessage(OpenRouterRequest request, String conversationId);
 }
